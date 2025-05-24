@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Regression-Based Tattoo Helpfulness Calculator</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; background-color: #f5f5f5; }
+    h2 { color: #2c3e50; }
+    label { display: block; margin-top: 15px; }
+    select, input[type="number"] { width: 300px; padding: 8px; margin-top: 5px; }
+    button { margin-top: 20px; padding: 10px 20px; background-color: #3498db; color: white; border: none; cursor: pointer; }
+    #output { margin-top: 20px; font-weight: bold; color: #2c3e50; font-size: 18px; }
+    #chart-container { margin-top: 40px; max-width: 700px; }
+  </style>
+</head>
+<body>
+  <h2>Regression-Based Tattoo Helpfulness Calculator</h2>
+
+  <label for="lesionsizemm">Lesion Size (mm):</label>
+  <input type="number" id="lesionsizemm" value="20">
+
+  <label for="colonoscopy_indication">Colonoscopy Indication:</label>
+  <select id="colonoscopy_indication">
+    <option value="1">Screening</option>
+    <option value="2">FIT/FOBT+</option>
+    <option value="3">Hematochezia</option>
+    <option value="4">Hx Polyps/Cancer</option>
+    <option value="5">IDA</option>
+    <option value="6">IBD</option>
+    <option value="8">Other Symptoms</option>
+  </select>
+
+  <label for="lesionlocationall">Lesion Location:</label>
+  <select id="lesionlocationall">
+    <option value="1">Cecum</option>
+    <option value="2">Ascending</option>
+    <option value="3">Transverse</option>
+    <option value="4">Descending</option>
+    <option value="5">Sigmoid</option>
+    <option value="6">Rectum</option>
+  </select>
+
+  <label for="elevatedborderswithcentraldepres">Elevated Borders with Central Depression:</label>
+  <select id="elevatedborderswithcentraldepres">
+    <option value="0">No</option>
+    <option value="1">Yes</option>
+  </select>
+
+  <label for="lesioninileocecalvalve">Located in Ileocecal Valve:</label>
+  <select id="lesioninileocecalvalve">
+    <option value="0">No</option>
+    <option value="1">Yes</option>
+  </select>
+
+  <label for="lesionfibrosisorscarring">Fibrosis or Scarring Present:</label>
+  <select id="lesionfibrosisorscarring">
+    <option value="0">No</option>
+    <option value="1">Yes</option>
+  </select>
+
+  <label for="pedunculatedorsemipedunculatedmo">Pedunculated or Semi-pedunculated:</label>
+  <select id="pedunculatedorsemipedunculatedmo">
+    <option value="0">No</option>
+    <option value="1">Yes</option>
+  </select>
+
+  <label for="nice_class">Nice Classification:</label>
+  <select id="nice_class">
+    <option value="1">Type 1 (Hyperplastic)</option>
+    <option value="2">Type 2 (Adenoma: TA/TVA/HGD)</option>
+    <option value="3">Serrated Pathway (SSL/TSA)</option>
+    <option value="4">Unknown</option>
+  </select>
+
+  <button onclick="calculateProbability()">Calculate</button>
+  <div id="output"></div>
+
+  <div id="chart-container">
+    <canvas id="probabilityChart"></canvas>
+  </div>
+
+  <script>
+    function calculateProbability() {
+      const x = parseFloat(document.getElementById("lesionsizemm").value);
+      const indication = parseInt(document.getElementById("colonoscopy_indication").value);
+      const location = parseInt(document.getElementById("lesionlocationall").value);
+      const elevated = parseInt(document.getElementById("elevatedborderswithcentraldepres").value);
+      const ileocecal = parseInt(document.getElementById("lesioninileocecalvalve").value);
+      const fibrosis = parseInt(document.getElementById("lesionfibrosisorscarring").value);
+      const pedunculated = parseInt(document.getElementById("pedunculatedorsemipedunculatedmo").value);
+      const nice = parseInt(document.getElementById("nice_class").value);
+
+      let logit = 0;
+      logit += (indication === 2 ? 1.124082 : 0);
+      logit += (indication === 4 ? 0.3436568 : 0);
+      logit += (indication === 8 ? 0.5626844 : 0);
+      logit += (location === 2 ? 1.242918 : 0);
+      logit += (location === 3 ? 0.7863201 : 0);
+      logit += (location === 4 ? 0.3672023 : 0);
+      logit += (location === 5 ? -1.234363 : 0);
+      logit += -2.151012 * elevated;
+      logit += -1.36939 * ileocecal;
+      logit += -0.8928441 * fibrosis;
+      logit += -1.030423 * pedunculated;
+      logit += (nice === 2 ? 0.2012144 : 0);
+      logit += (nice === 3 ? 0.8903706 : 0);
+      logit += -0.0747445 * x;
+      logit += 1.359816;
+
+      const probability = 1 / (1 + Math.exp(-logit));
+      document.getElementById("output").innerHTML = `Predicted Probability of Tattoo Being Helpful: <strong>${(probability * 100).toFixed(1)}%</strong>`;
+      updateChart(x);
+    }
+
+    function updateChart(selectedSize) {
+      const labels = [], values = [];
+      for (let x = 1; x <= 80; x++) {
+        let logit = 0;
+        const indication = parseInt(document.getElementById("colonoscopy_indication").value);
+        const location = parseInt(document.getElementById("lesionlocationall").value);
+        const elevated = parseInt(document.getElementById("elevatedborderswithcentraldepres").value);
+        const ileocecal = parseInt(document.getElementById("lesioninileocecalvalve").value);
+        const fibrosis = parseInt(document.getElementById("lesionfibrosisorscarring").value);
+        const pedunculated = parseInt(document.getElementById("pedunculatedorsemipedunculatedmo").value);
+        const nice = parseInt(document.getElementById("nice_class").value);
+
+        logit += (indication === 2 ? 1.124082 : 0);
+        logit += (indication === 4 ? 0.3436568 : 0);
+        logit += (indication === 8 ? 0.5626844 : 0);
+        logit += (location === 2 ? 1.242918 : 0);
+        logit += (location === 3 ? 0.7863201 : 0);
+        logit += (location === 4 ? 0.3672023 : 0);
+        logit += (location === 5 ? -1.234363 : 0);
+        logit += -2.151012 * elevated;
+        logit += -1.36939 * ileocecal;
+        logit += -0.8928441 * fibrosis;
+        logit += -1.030423 * pedunculated;
+        logit += (nice === 2 ? 0.2012144 : 0);
+        logit += (nice === 3 ? 0.8903706 : 0);
+        logit += -0.0747445 * x;
+        logit += 1.359816;
+
+        labels.push(x);
+        values.push(1 / (1 + Math.exp(-logit)));
+      }
+
+      if (window.probChart) window.probChart.destroy();
+      const ctx = document.getElementById("probabilityChart").getContext("2d");
+      window.probChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: "Predicted Probability by Lesion Size",
+            data: values,
+            fill: false,
+            borderColor: "#2980b9",
+            tension: 0.2
+          }]
+        },
+        options: {
+          scales: {
+            x: { title: { display: true, text: 'Lesion Size (mm)' } },
+            y: { title: { display: true, text: 'Probability' }, min: 0, max: 1 }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    window.onload = () => updateChart(20);
+  </script>
+</body>
+</html>
