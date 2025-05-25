@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -47,12 +48,6 @@
     <option value="1">Yes</option>
   </select>
 
-  <label for="lesioninileocecalvalve">Located in Ileocecal Valve:</label>
-  <select id="lesioninileocecalvalve">
-    <option value="0">No</option>
-    <option value="1">Yes</option>
-  </select>
-
   <label for="lesionfibrosisorscarring">Fibrosis or Scarring Present:</label>
   <select id="lesionfibrosisorscarring">
     <option value="0">No</option>
@@ -65,12 +60,11 @@
     <option value="1">Yes</option>
   </select>
 
-  <label for="nice_class">Nice Classification:</label>
-  <select id="nice_class">
-    <option value="1">Type 1 (Hyperplastic)</option>
-    <option value="2">Type 2 (Adenoma: TA/TVA/HGD)</option>
-    <option value="3">Serrated Pathway (SSL/TSA)</option>
-    <option value="4">Unknown</option>
+  <label for="suspectedmorphology">Suspected Morphology:</label>
+  <select id="suspectedmorphology">
+    <option value="1">Hyperplastic</option>
+    <option value="2">Adenoma</option>
+    <option value="3">Serrated Pathway</option>
   </select>
 
   <button onclick="calculateProbability()">Calculate</button>
@@ -86,61 +80,54 @@
       const indication = parseInt(document.getElementById("colonoscopy_indication").value);
       const location = parseInt(document.getElementById("lesionlocationall").value);
       const elevated = parseInt(document.getElementById("elevatedborderswithcentraldepres").value);
-      const ileocecal = parseInt(document.getElementById("lesioninileocecalvalve").value);
       const fibrosis = parseInt(document.getElementById("lesionfibrosisorscarring").value);
       const pedunculated = parseInt(document.getElementById("pedunculatedorsemipedunculatedmo").value);
-      const nice = parseInt(document.getElementById("nice_class").value);
+      const morph = parseInt(document.getElementById("suspectedmorphology").value);
 
       let logit = 0;
-      logit += (indication === 2 ? 1.124082 : 0);
-      logit += (indication === 4 ? 0.3436568 : 0);
-      logit += (indication === 8 ? 0.5626844 : 0);
-      logit += (location === 2 ? 1.242918 : 0);
-      logit += (location === 3 ? 0.7863201 : 0);
-      logit += (location === 4 ? 0.3672023 : 0);
-      logit += (location === 5 ? -1.234363 : 0);
-      logit += -2.151012 * elevated;
-      logit += -1.36939 * ileocecal;
-      logit += -0.8928441 * fibrosis;
-      logit += -1.030423 * pedunculated;
-      logit += (nice === 2 ? 0.2012144 : 0);
-      logit += (nice === 3 ? 0.8903706 : 0);
-      logit += -0.0747445 * x;
-      logit += 1.359816;
+      logit += (indication === 2 ? 1.182508 : 0);
+      logit += (indication === 4 ? 0.4020261 : 0);
+      logit += (indication === 8 ? 0.304348 : 0);
+      logit += (location === 2 ? 2.45008 : 0);
+      logit += (location === 3 ? 2.031535 : 0);
+      logit += (location === 4 ? 1.567262 : 0);
+      logit += -2.099315 * elevated;
+      logit += -0.8358958 * fibrosis;
+      logit += -0.9752882 * pedunculated;
+      logit += (morph === 2 ? 0.1773799 : 0);
+      logit += (morph === 3 ? 0.777 : 0);
+      logit += -0.0694509 * x;
+      logit += -0.045359;
 
       const probability = 1 / (1 + Math.exp(-logit));
       document.getElementById("output").innerHTML = `Predicted Probability of Tattoo Being Helpful: <strong>${(probability * 100).toFixed(1)}%</strong>`;
-      updateChart(x);
+      updateChart();
     }
 
-    function updateChart(selectedSize) {
+    function updateChart() {
+      const indication = parseInt(document.getElementById("colonoscopy_indication").value);
+      const location = parseInt(document.getElementById("lesionlocationall").value);
+      const elevated = parseInt(document.getElementById("elevatedborderswithcentraldepres").value);
+      const fibrosis = parseInt(document.getElementById("lesionfibrosisorscarring").value);
+      const pedunculated = parseInt(document.getElementById("pedunculatedorsemipedunculatedmo").value);
+      const morph = parseInt(document.getElementById("suspectedmorphology").value);
+
       const labels = [], values = [];
       for (let x = 1; x <= 80; x++) {
         let logit = 0;
-        const indication = parseInt(document.getElementById("colonoscopy_indication").value);
-        const location = parseInt(document.getElementById("lesionlocationall").value);
-        const elevated = parseInt(document.getElementById("elevatedborderswithcentraldepres").value);
-        const ileocecal = parseInt(document.getElementById("lesioninileocecalvalve").value);
-        const fibrosis = parseInt(document.getElementById("lesionfibrosisorscarring").value);
-        const pedunculated = parseInt(document.getElementById("pedunculatedorsemipedunculatedmo").value);
-        const nice = parseInt(document.getElementById("nice_class").value);
-
-        logit += (indication === 2 ? 1.124082 : 0);
-        logit += (indication === 4 ? 0.3436568 : 0);
-        logit += (indication === 8 ? 0.5626844 : 0);
-        logit += (location === 2 ? 1.242918 : 0);
-        logit += (location === 3 ? 0.7863201 : 0);
-        logit += (location === 4 ? 0.3672023 : 0);
-        logit += (location === 5 ? -1.234363 : 0);
-        logit += -2.151012 * elevated;
-        logit += -1.36939 * ileocecal;
-        logit += -0.8928441 * fibrosis;
-        logit += -1.030423 * pedunculated;
-        logit += (nice === 2 ? 0.2012144 : 0);
-        logit += (nice === 3 ? 0.8903706 : 0);
-        logit += -0.0747445 * x;
-        logit += 1.359816;
-
+        logit += (indication === 2 ? 1.182508 : 0);
+        logit += (indication === 4 ? 0.4020261 : 0);
+        logit += (indication === 8 ? 0.304348 : 0);
+        logit += (location === 2 ? 2.45008 : 0);
+        logit += (location === 3 ? 2.031535 : 0);
+        logit += (location === 4 ? 1.567262 : 0);
+        logit += -2.099315 * elevated;
+        logit += -0.8358958 * fibrosis;
+        logit += -0.9752882 * pedunculated;
+        logit += (morph === 2 ? 0.1773799 : 0);
+        logit += (morph === 3 ? 0.777 : 0);
+        logit += -0.0694509 * x;
+        logit += -0.045359;
         labels.push(x);
         values.push(1 / (1 + Math.exp(-logit)));
       }
@@ -169,7 +156,14 @@
       });
     }
 
-    window.onload = () => updateChart(20);
+    window.onload = () => updateChart();
   </script>
 </body>
 </html>
+"""
+
+# Save to file
+output_path = Path("/mnt/data/Updated_Tattoo_Calculator.html")
+output_path.write_text(updated_html)
+
+output_path.name
