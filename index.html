@@ -60,11 +60,12 @@
     <option value="1">Yes</option>
   </select>
 
-  <label for="suspectedmorphology">Suspected Morphology:</label>
+  <label for="suspectedmorphology">Morphology (suspected):</label>
   <select id="suspectedmorphology">
     <option value="1">Hyperplastic</option>
-    <option value="2">Adenoma</option>
-    <option value="3">Serrated Pathway</option>
+    <option value="2">Adenoma: TA/TVA/HGD</option>
+    <option value="3">Serrated Pathway (SSL/TSA)</option>
+    <option value="4">Unknown</option>
   </select>
 
   <button onclick="calculateProbability()">Calculate</button>
@@ -162,8 +163,8 @@
 </html>
 """
 
-# Save to file
-output_path = Path("/mnt/data/Updated_Tattoo_Calculator.html")
+# Save updated file
+output_path = Path("/mnt/data/Tattoo_Calculator_Final.html")
 output_path.write_text(updated_html)
 
 output_path.name
